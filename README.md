@@ -1,0 +1,1 @@
+# AJAX-CRUD-Flask-tables
