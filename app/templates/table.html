@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Table</title>
+
+    <style>
+        body {
+            background-color: #f4f4f4;
+        }
+
+        table, th, td {
+            margin: 0 auto;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: red;
+        }
+
+        tr:nth-child(even) {
+            background-color: #d8d8d8;
+        }
+
+        td {
+            position: relative;
+            outline: 0;
+        }
+
+        td > .button-toolbar {
+            display: none;
+            border-top: none;
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            left: -2px;
+            width: calc(100% + 4px);
+            z-index: 2;
+            text-align: center;
+        }
+
+        .in-editing > .button-toolbar {
+            display: flex;
+            justify-content: center;
+        }
+
+        .in-editing {
+            background-color: #fff;
+            border: 2px solid rgb(155, 155, 155);
+            border-radius: 0px;
+            border-left: none;
+            border-right: none;
+            border-top: none;
+        }
+
+        .button-wrapper {
+            padding: 5px;
+            background-color: #fff;
+            border: 2px solid rgb(155, 155, 155);
+            border-top: none;
+            border-radius: 0px 0px 5px 5px;
+        }
+
+        .saveBtn {
+            background-color: rgb(30, 30, 255);
+            color: white;
+            border-radius: 6px;
+            border: none;
+            margin: 5px;
+            height: 35px;
+            width: 65px;
+        }
+
+        .cancelBtn {
+            background-color: red;
+            color: white;
+            border-radius: 6px;
+            border: none;
+            margin: 5px;
+            height: 35px;
+            width: 65px;
+        }
+    </style>
+</head>
+<body>
+    <h1> User Data </h1>
+
+    <table>
+        {% for header in table_data[0] %}
+            <th id='header'>{{ header }}</th>
+        {% endfor %}
+
+        {% for row in table_data %}
+            <tr>
+                {% for item in row %}
+                    <td class='{{ item }}' id='{{ item }}{{ row.id }}' width='{{ (row[item])|string|length * 30 }}px'> {{ row[item] }} </td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+    </table>
+
+
+    <script>
+        console.log('edit_table.js started successfully');
+
+        class TableCellEditing{
+            constructor(table){
+                this.tbody = table.querySelector('tbody');
+            }
+            
+            init() {
+                this.tds = this.tbody.querySelectorAll('td');
+                this.tds.forEach(td => {
+                    td.setAttribute('contenteditable', true);
+
+                    td.addEventListener('click', (ev) => {
+                        if(!this.inEditing(td)) {
+                            this.startEditing(td);
+                        };
+                    });
+                });
+            }
+
+            startEditing(td) {
+
+                const activeTD = this.findEditing();
+                if(activeTD) {
+                    this.cancelEditing(activeTD);
+                };
+
+
+                td.classList.add('in-editing');
+                td.setAttribute('data-old-value', td.innerHTML);
+                this.createButtonToolbaar(td);
+            }
+
+            cancelEditing(td) {
+                td.innerHTML = td.getAttribute('data-old-value');
+
+                td.classList.remove('in-editing');
+                //this.removeToolbar(td);
+            }
+
+            finishEditing(td) {
+                td.classList.remove('in-editing');
+                this.removeToolbar(td);
+
+                var data = td.textContent;
+                this.sendData(td, data);
+            }
+
+            inEditing(td) {
+                return td.classList.contains('in-editing')
+            }
+
+            createButtonToolbaar(td) {
+                const saveBtn = document.createElement('button');
+                const cancelBtn = document.createElement('button');
+                const divBtn = document.createElement('div');
+                const toolbar = document.createElement('div');
+
+                saveBtn.className = 'saveBtn';
+                cancelBtn.className = 'cancelBtn';
+                divBtn.className = 'button-wrapper';
+                toolbar.className = 'button-toolbar';
+
+                toolbar.setAttribute('contenteditable', false)
+
+                saveBtn.textContent = 'Save';
+                cancelBtn.textContent = 'Cancel';
+
+                divBtn.appendChild(cancelBtn);
+                divBtn.appendChild(saveBtn);
+
+                toolbar.appendChild(divBtn);
+
+                td.appendChild(toolbar);
+
+                const btnSave = toolbar.querySelector('.saveBtn'); 
+                const btnCancel = toolbar.querySelector('.cancelBtn');
+
+                btnSave.addEventListener('click', (ev) => {
+                    ev.stopPropagation();
+                    this.finishEditing(td);
+                });
+
+                btnCancel.addEventListener('click', (ev) => {
+                    ev.stopPropagation();
+                    this.cancelEditing(td);
+                });
+            }
+
+            removeToolbar(td) {
+                const toolbar = td.querySelector('.button-toolbar');
+                toolbar.remove();
+            }
+
+            findEditing() {
+                return Array.prototype.find.call(this.tds, td => this.inEditing(td));
+            }
+
+            sendData(td, newData) {
+                var xhr = new XMLHttpRequest();
+
+                xhr.onload = function() {
+                    console.log(xhr.responseText);
+                }
+
+                xhr.open('POST', '/saveData', true);
+                xhr.setRequestHeader('content-type', 'application/x-www-form-urlencoded');
+                xhr.send(`data=${newData}&id=${td.id}`);
+
+            }
+        }
+
+
+        const tableElement = document.querySelector('table');
+        const editing = new TableCellEditing(tableElement);
+        editing.init();
+
+    </script>
+</body>
+</html>
