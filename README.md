@@ -1,5 +1,5 @@
 # AJAX-CRUD-Flask-tables
-============================================================================
+
 
 This app is a prototype for loading database tables from mySQL , and
 displaying them in an web page through Flask and constructing the table with 
@@ -38,4 +38,3 @@ the page being reloaded.
 └── requirements.txt
 ```
 
-============================================================================
