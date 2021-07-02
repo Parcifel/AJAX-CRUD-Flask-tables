@@ -9,7 +9,7 @@ server for processing and updating the mySQL database.
 
 ============================================================================
 
-in-place-edit:
+## in-place-edit:
 
 In place edit refer to editing some data in the place it is, without another
 page/ form being needed.
@@ -17,10 +17,11 @@ In this example it has been done, so you can click on a cell of a table, and
 edit the data of that cell, save it and it being saved to a database without 
 the page being reloaded.
 
-=============================================================================
+============================================================================
 
-Files:
+## Files:
 
+```
 .
 ├── app
 │   ├── static
@@ -32,8 +33,9 @@ Files:
 │   ├── app.py
 │   ├── main.py
 │   └── db_config.py
-│ 
+│
 ├── README.md
 └── requirements.txt
+```
 
-=============================================================================
+============================================================================
